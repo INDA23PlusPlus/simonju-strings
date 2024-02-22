@@ -1,10 +1,11 @@
-const PRIME: u128 = 769;
+const PRIME: u128 = 769; // Low collision prime.
 const MODULO: u128 = 12_055_296_811_267; // more digits <=> more test cases passed
 const SIZE: usize = 300_000;
 
 const POWERS: [u128; SIZE] = {
     let mut powers = [1; SIZE];
 
+    // Rust does not allow for-loops here.
     let mut i = 1;
     while i < SIZE {
         powers[i] = (powers[i - 1] * PRIME) % MODULO;
@@ -25,7 +26,7 @@ pub fn string_hashing() {
     let _queries = lines.next();
 
     for (i, byte) in string.bytes().enumerate() {
-        unsafe { HASHES[i + 1] = (((HASHES[i] * PRIME) % MODULO) + byte as u128) % MODULO};
+        unsafe { HASHES[i + 1] = (((HASHES[i] * PRIME) % MODULO) + byte as u128) % MODULO };
     }
 
     while let Some(Ok(line)) = lines.next() {
