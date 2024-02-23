@@ -10,8 +10,8 @@ pub fn chasing_subs() {
     let string = unsafe { lines.next().unwrap_unchecked().unwrap_unchecked() };
     let pattern = unsafe { lines.next().unwrap_unchecked().unwrap_unchecked() };
 
-    let mut longest_sequence = 0;
-    let mut sequence_counter = 0;
+    let mut longest_sequence_length = 0;
+    let mut current_sequence_length = 0;
 
     let mut pattern_iter = pattern.bytes().enumerate();
 
@@ -27,11 +27,14 @@ pub fn chasing_subs() {
 
         unsafe { PATTERN[i] = ARRAY[byte as usize - 97] };
 
+        if alphabet_counter > 1 {
+            longest_sequence_length = longest_sequence_length.max(current_sequence_length);
+        }
+
         if unsafe { PATTERN[i] == PATTERN[i - 1] } {
-            sequence_counter += 1;
+            current_sequence_length += 1;
         } else {
-            longest_sequence = longest_sequence.max(sequence_counter);
-            sequence_counter = 0;
+            current_sequence_length = 0;
         }
     }
 
@@ -39,9 +42,9 @@ pub fn chasing_subs() {
     let mut match_index = 0;
     let mut match_count = 0;
 
-    let mut iter = (0..string.len() - pattern.len() + 1).into_iter();
+    let mut string_iter = (0..string.len() - pattern.len() + 1).into_iter();
 
-    while let Some(i) = iter.next() {
+    while let Some(i) = string_iter.next() {
         unsafe { ARRAY = RESET };
         alphabet_counter = 1;
 
@@ -65,7 +68,7 @@ pub fn chasing_subs() {
             match_index = i;
             match_count += 1;
 
-            if longest_sequence > 0 { iter.nth(longest_sequence - 1); }
+            if longest_sequence_length > 0 { string_iter.nth(longest_sequence_length - 1); }
         }
 
         matches = true;
@@ -78,19 +81,55 @@ pub fn chasing_subs() {
 }
 
 /*
-secretmessage
-boot
-=> essa
+    secretmessage
+    boot
+    : essa
 
-treetreetreetree
-wood
-=> 3
+    treetreetreetree
+    wood
+    : 3
 
-oranges
-apples
-=> 0
+    oranges
+    apples
+    : 0
 
-archipelago
-submarine
-=> 2
-*/ 
+    archipelago
+    submarine
+    : 2
+*/
+
+/* 
+    |--------------|--------------|
+    | optimal skip | current skip |
+    |--------------|--------------|
+    | aabccdd      | aabccdd      |
+    |      ^       |   ^          |
+    |--------------|--------------|
+    | abbcccdddd   | abbcccdddd   |
+    |          ^   |     ^        |
+    |--------------|--------------|
+    | abbc         | abbc         |
+    |   ^          |   ^          |
+    |--------------|--------------|
+    | abbcc        | abbcc        |
+    |     ^        |   ^          |
+    |--------------|--------------|
+    | abbccc       | abbccc       |
+    |      ^       |    ^         |
+    |--------------|--------------|
+    | aaabbc       | aaabbc       |
+    |      ^       |    ^         |
+    |--------------|--------------|
+    | faaabbc      | faaabbc      |
+    |       ^      |    ^         |
+    |--------------|--------------|
+    | fgaaabbc     | fgaaabbc     |
+    |        ^     |    ^         |
+    |--------------|--------------|
+    | ffaaabbc     | ffaaabbc     |
+    |      ^       |    ^         |
+    |--------------|--------------|
+    | ffaaabbb     | ffaaabbb     |
+    |    ^         |    ^         |
+    |--------------|--------------|
+*/
